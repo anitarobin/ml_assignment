@@ -81,14 +81,14 @@ Our aim is to apply suitable machine learning techniques to predict the manner i
 
 ###Looking at the above, it seems that **an approach involving a step by step binary classification between class A vs. each of the other classes ** may yield us a list of variables that we can use to finally train our final model for classifying the data.
 
-###To check the feasibilty of the above approach, we generated a subset of the data to include only the variables of interest(using exploratory data plots, not included in this document, in the interest of brevity). Then we further split up data into training and test(for validation). A look at the accuracy on the taining and cross validation set will help us decide in favour of/against this approach. We plan to use random forest(with cross validation) to train our classifier since its the most efficient one for non linear settings. 
+###To check the feasibilty of the above approach, we generated a subset of the data to include only the variables of interest(using exploratory data plots, not included in this document, in the interest of brevity). Then we further split up data into training and test(for cross validation). A look at the accuracy on the taining and cross validation set will help us decide in favour of/against this approach. We plan to use random forest to train our classifier since its the most efficient one for non linear settings. 
 
 ---
 
 ```{r, echo=FALSE}
 #subset the data - include only class A and class B and feature set for 
 #arm/forearm/dumbbell excluding all statistical variables
-        
+        set.seed(1234)
         trainings<-training[training$classe %in% c("A","B"),
                     c("accel_dumbbell_x","accel_dumbbell_y",
                        "magnet_dumbbell_x","gyros_arm_x","gyros_arm_y",
@@ -116,12 +116,13 @@ Our aim is to apply suitable machine learning techniques to predict the manner i
         test$rightPred <- (pred1 == test$classe) 
         accuracy <- sum(test$rightPred)/nrow(test)
         accuracy
-#looking for strong correlations to eliminate if neccessary
-        cor(trainings[sapply(trainings, function(x) !is.factor(x))])
+#looking for strong correlations to eliminate if neccessary 
+#commented here for the sake of brevity
+ #           cor(trainings[sapply(trainings, function(x) !is.factor(x))])
 
 ```
 
-###The accuracy figure of **'round(accuracy*100,2)'** is very encouraging. Hence we go ahead and fit models for each of the other classes. We end up with a variable list that we use to run our final model on, again using random forest.
+###The accuracy figure of ~98% is very encouraging. Hence we go ahead and fit models for each of the other classes. We end up with a variable list that we use to run our final model on, again using random forest.
 
 
 ```{r, eval=FALSE}
@@ -211,22 +212,29 @@ Our aim is to apply suitable machine learning techniques to predict the manner i
                  verbose = FALSE,
                  trControl=trainControl(method="cv"),number=3
         )
+#testing the accuracy
+        pred1<-predict(modFit4,test)
+        test$rightPred <- (pred1 == test$classe) 
+        accuracy <- sum(test$rightPred)/nrow(test)
+        accuracy
 ```
 
-##Final model selection
+## Final model selection
 
-###We will now combine all above models by including all the predictors used and train the model ,once again, using random forest with cross validation, on our original training dataset which has been split into training and test(for validation).
+### We have a comparable accuracy for class B and E (around 98%) and slightly lower for class C and D which is understandable both relate to the lifting/lowering of dumbbell only halfway and hence the classifier will be influenced by the same predictors. 
+### We will now combine all above models by including all the predictors used and train the model ,once again, using random forest with cross validation, on our original training dataset which has been split into training and test(for validation).
 
 ```{r }
 
 #original training set - omit nas
+        set.seed(1234)
         training[is.na(training)] <- 0
         inTrain = createDataPartition(training$classe, p = 3/4)[[1]]
         train = training[ inTrain,]
         test = training[ -inTrain,]
 
 #building the model with combined predictors
-        modFit5 <- train(classe ~ accel_belt_x+accel_belt_y+accel_belt_z+
+        finalModel <- train(classe ~ accel_belt_x+accel_belt_y+accel_belt_z+
                  roll_belt+pitch_belt+yaw_belt+
                  magnet_belt_z+magnet_belt_x+
                  magnet_belt_y+accel_dumbbell_x+accel_dumbbell_y+
@@ -240,12 +248,18 @@ Our aim is to apply suitable machine learning techniques to predict the manner i
                 trControl=trainControl(method="cv"),number=3
                 )
 #using the final model to test predictions against our validation set
-        pred1<-predict(modFit5,test)
+        pred1<-predict(finalModel,test)
         test$rightPred <- (pred1 == test$classe) 
         accuracy <- sum(test$rightPred)/nrow(test)
         
 #Accuracy of the classifier
         accuracy
+        
+#Final model
+        finalModel
 ```
 ---
 
+##Conclusion
+
+###Using random forest iteratively using binary classification between class A and each of the other classes in each step leads us to a very good classifier with an accuracy of ~98%. We expect an out of sample error rate of less than 2%.

@@ -227,8 +227,8 @@ $(document).ready(function () {
 <div id="looking-at-the-above-it-seems-that-an-approach-involving-a-step-by-step-binary-classification-between-class-a-vs.each-of-the-other-classes-may-yield-us-a-list-of-variables-that-we-can-use-to-finally-train-our-final-model-for-classifying-the-data." class="section level3">
 <h3>Looking at the above, it seems that <strong>an approach involving a step by step binary classification between class A vs. each of the other classes </strong> may yield us a list of variables that we can use to finally train our final model for classifying the data.</h3>
 </div>
-<div id="to-check-the-feasibilty-of-the-above-approach-we-generated-a-subset-of-the-data-to-include-only-the-variables-of-interestusing-exploratory-data-plots-not-included-in-this-document-in-the-interest-of-brevity.-then-we-further-split-up-data-into-training-and-testfor-validation.-a-look-at-the-accuracy-on-the-taining-and-cross-validation-set-will-help-us-decide-in-favour-ofagainst-this-approach.-we-plan-to-use-random-forestwith-cross-validation-to-train-our-classifier-since-its-the-most-efficient-one-for-non-linear-settings." class="section level3">
-<h3>To check the feasibilty of the above approach, we generated a subset of the data to include only the variables of interest(using exploratory data plots, not included in this document, in the interest of brevity). Then we further split up data into training and test(for validation). A look at the accuracy on the taining and cross validation set will help us decide in favour of/against this approach. We plan to use random forest(with cross validation) to train our classifier since its the most efficient one for non linear settings.</h3>
+<div id="to-check-the-feasibilty-of-the-above-approach-we-generated-a-subset-of-the-data-to-include-only-the-variables-of-interestusing-exploratory-data-plots-not-included-in-this-document-in-the-interest-of-brevity.-then-we-further-split-up-data-into-training-and-testfor-cross-validation.-a-look-at-the-accuracy-on-the-taining-and-cross-validation-set-will-help-us-decide-in-favour-ofagainst-this-approach.-we-plan-to-use-random-forest-to-train-our-classifier-since-its-the-most-efficient-one-for-non-linear-settings." class="section level3">
+<h3>To check the feasibilty of the above approach, we generated a subset of the data to include only the variables of interest(using exploratory data plots, not included in this document, in the interest of brevity). Then we further split up data into training and test(for cross validation). A look at the accuracy on the taining and cross validation set will help us decide in favour of/against this approach. We plan to use random forest to train our classifier since its the most efficient one for non linear settings.</h3>
 <hr />
 <pre><code>## Random Forest 
 ## 
@@ -238,53 +238,20 @@ $(document).ready(function () {
 ## 
 ## No pre-processing
 ## Resampling: Cross-Validated (10 fold) 
-## Summary of sample sizes: 6330, 6330, 6330, 6330, 6330, 6329, ... 
+## Summary of sample sizes: 6330, 6330, 6329, 6330, 6330, 6329, ... 
 ## Resampling results across tuning parameters:
 ## 
 ##   mtry  Accuracy   Kappa      Accuracy SD  Kappa SD  
-##    2    0.9741204  0.9459997  0.006669031  0.01395239
-##    6    0.9752584  0.9484071  0.006155037  0.01282856
-##   10    0.9719877  0.9416133  0.007039534  0.01465541
+##    2    0.9732696  0.9442053  0.008543601  0.01796725
+##    6    0.9736961  0.9451190  0.007584142  0.01599874
+##   10    0.9705679  0.9386599  0.009732676  0.02044544
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was mtry = 6.</code></pre>
-<pre><code>## [1] 0.9748294</code></pre>
-<pre><code>##                   accel_dumbbell_x accel_dumbbell_y magnet_dumbbell_x
-## accel_dumbbell_x       1.000000000      -0.38807857        0.45045612
-## accel_dumbbell_y      -0.388078570       1.00000000       -0.27973342
-## magnet_dumbbell_x      0.450456124      -0.27973342        1.00000000
-## gyros_arm_x           -0.007760535       0.05114772       -0.06740180
-## gyros_arm_y           -0.061557079      -0.00652303        0.03089107
-## pitch_arm             -0.186039434       0.13950311       -0.07535206
-## pitch_forearm          0.465770148      -0.17869070        0.37630963
-## magnet_forearm_x      -0.139214332       0.08168814       -0.16301584
-## magnet_forearm_y      -0.195785992      -0.02997228       -0.03091598
-## accel_forearm_x       -0.301641590       0.11727497        0.04940618
-##                    gyros_arm_x gyros_arm_y    pitch_arm pitch_forearm
-## accel_dumbbell_x  -0.007760535 -0.06155708 -0.186039434     0.4657701
-## accel_dumbbell_y   0.051147718 -0.00652303  0.139503113    -0.1786907
-## magnet_dumbbell_x -0.067401801  0.03089107 -0.075352062     0.3763096
-## gyros_arm_x        1.000000000 -0.91783699  0.014818355    -0.1003966
-## gyros_arm_y       -0.917836989  1.00000000  0.018855807     0.0248260
-## pitch_arm          0.014818355  0.01885581  1.000000000    -0.1896154
-## pitch_forearm     -0.100396592  0.02482600 -0.189615429     1.0000000
-## magnet_forearm_x  -0.083727427  0.10124769  0.041271939    -0.4497371
-## magnet_forearm_y   0.346816046 -0.27450525 -0.015289515    -0.3324655
-## accel_forearm_x    0.018969521  0.10378260 -0.006404213    -0.5033722
-##                   magnet_forearm_x magnet_forearm_y accel_forearm_x
-## accel_dumbbell_x       -0.13921433      -0.19578599    -0.301641590
-## accel_dumbbell_y        0.08168814      -0.02997228     0.117274971
-## magnet_dumbbell_x      -0.16301584      -0.03091598     0.049406183
-## gyros_arm_x            -0.08372743       0.34681605     0.018969521
-## gyros_arm_y             0.10124769      -0.27450525     0.103782598
-## pitch_arm               0.04127194      -0.01528952    -0.006404213
-## pitch_forearm          -0.44973710      -0.33246553    -0.503372226
-## magnet_forearm_x        1.00000000      -0.23076674     0.671371460
-## magnet_forearm_y       -0.23076674       1.00000000     0.285910628
-## accel_forearm_x         0.67137146       0.28591063     1.000000000</code></pre>
+<pre><code>## [1] 0.9756826</code></pre>
 </div>
-<div id="the-accuracy-figure-of-roundaccuracy1002-is-very-encouraging.-hence-we-go-ahead-and-fit-models-for-each-of-the-other-classes.-we-end-up-with-a-variable-list-that-we-use-to-run-our-final-model-on-again-using-random-forest." class="section level3">
-<h3>The accuracy figure of **’round(accuracy*100,2)’** is very encouraging. Hence we go ahead and fit models for each of the other classes. We end up with a variable list that we use to run our final model on, again using random forest.</h3>
+<div id="the-accuracy-figure-of-98-is-very-encouraging.-hence-we-go-ahead-and-fit-models-for-each-of-the-other-classes.-we-end-up-with-a-variable-list-that-we-use-to-run-our-final-model-on-again-using-random-forest." class="section level3">
+<h3>The accuracy figure of ~98% is very encouraging. Hence we go ahead and fit models for each of the other classes. We end up with a variable list that we use to run our final model on, again using random forest.</h3>
 <pre class="r"><code>###class C
 #pattern matching for columns containing dumbbell
         l&lt;-grep(&quot;dumbbell&quot;,colnames(training))
@@ -370,21 +337,30 @@ $(document).ready(function () {
                  data=train,
                  verbose = FALSE,
                  trControl=trainControl(method=&quot;cv&quot;),number=3
-        )</code></pre>
+        )
+#testing the accuracy
+        pred1&lt;-predict(modFit4,test)
+        test$rightPred &lt;- (pred1 == test$classe) 
+        accuracy &lt;- sum(test$rightPred)/nrow(test)
+        accuracy</code></pre>
 </div>
 </div>
 <div id="final-model-selection" class="section level2">
 <h2>Final model selection</h2>
+<div id="we-have-a-comparable-accuracy-for-class-b-and-e-around-98-and-slightly-lower-for-class-c-and-d-which-is-understandable-both-relate-to-the-liftinglowering-of-dumbbell-only-halfway-and-hence-the-classifier-will-be-influenced-by-the-same-predictors." class="section level3">
+<h3>We have a comparable accuracy for class B and E (around 98%) and slightly lower for class C and D which is understandable both relate to the lifting/lowering of dumbbell only halfway and hence the classifier will be influenced by the same predictors.</h3>
+</div>
 <div id="we-will-now-combine-all-above-models-by-including-all-the-predictors-used-and-train-the-model-once-again-using-random-forest-with-cross-validation-on-our-original-training-dataset-which-has-been-split-into-training-and-testfor-validation." class="section level3">
 <h3>We will now combine all above models by including all the predictors used and train the model ,once again, using random forest with cross validation, on our original training dataset which has been split into training and test(for validation).</h3>
 <pre class="r"><code>#original training set - omit nas
+        set.seed(1234)
         training[is.na(training)] &lt;- 0
         inTrain = createDataPartition(training$classe, p = 3/4)[[1]]
         train = training[ inTrain,]
         test = training[ -inTrain,]
 
 #building the model with combined predictors
-        modFit5 &lt;- train(classe ~ accel_belt_x+accel_belt_y+accel_belt_z+
+        finalModel &lt;- train(classe ~ accel_belt_x+accel_belt_y+accel_belt_z+
                  roll_belt+pitch_belt+yaw_belt+
                  magnet_belt_z+magnet_belt_x+
                  magnet_belt_y+accel_dumbbell_x+accel_dumbbell_y+
@@ -398,14 +374,40 @@ $(document).ready(function () {
                 trControl=trainControl(method=&quot;cv&quot;),number=3
                 )
 #using the final model to test predictions against our validation set
-        pred1&lt;-predict(modFit5,test)
+        pred1&lt;-predict(finalModel,test)
         test$rightPred &lt;- (pred1 == test$classe) 
         accuracy &lt;- sum(test$rightPred)/nrow(test)
         
 #Accuracy of the classifier
         accuracy</code></pre>
-<pre><code>## [1] 0.9824633</code></pre>
+<pre><code>## [1] 0.9842985</code></pre>
+<pre class="r"><code>#Final model
+        finalModel</code></pre>
+<pre><code>## Random Forest 
+## 
+## 14718 samples
+##   159 predictor
+##     5 classes: 'A', 'B', 'C', 'D', 'E' 
+## 
+## No pre-processing
+## Resampling: Cross-Validated (10 fold) 
+## Summary of sample sizes: 13244, 13246, 13246, 13247, 13246, 13246, ... 
+## Resampling results across tuning parameters:
+## 
+##   mtry  Accuracy   Kappa      Accuracy SD  Kappa SD   
+##    2    0.9838970  0.9796302  0.002565438  0.003244203
+##   11    0.9832858  0.9788570  0.003859854  0.004882396
+##   21    0.9797532  0.9743904  0.004232149  0.005355529
+## 
+## Accuracy was used to select the optimal model using  the largest value.
+## The final value used for the model was mtry = 2.</code></pre>
 <hr />
+</div>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<div id="using-random-forest-iteratively-using-binary-classification-between-class-a-and-each-of-the-other-classes-in-each-step-leads-us-to-a-very-good-classifier-with-an-accuracy-of-98.-we-expect-an-out-of-sample-error-rate-of-less-than-2." class="section level3">
+<h3>Using random forest iteratively using binary classification between class A and each of the other classes in each step leads us to a very good classifier with an accuracy of ~98%. We expect an out of sample error rate of less than 2%.</h3>
 </div>
 </div>
 
