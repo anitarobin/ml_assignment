@@ -1,0 +1,127 @@
+---
+title: "Prediction Assignment"
+author: "Anita Robin"
+date: "13 March 2016"
+output: html_document
+---
+
+
+
+## Background
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, our goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (refer Weight Lifting Exercise Dataset).
+
+Participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in ﬁve diﬀerent fashions: exactly according to the speciﬁcation **(Class A)**, throwing the elbows to the front**(Class B)**, lifting the dumbbell only halfway **(Class C)**, lowering the dumbbell only halfway **(Class D)** and throwing the hips to the front **(Class E)**. 
+
+Our aim is to apply suitable machine learning techniques to predict the manner in which they did the exercise. 
+
+---
+
+## Getting the Data
+
+
+```{r , echo = FALSE}
+#loading the required library
+        library(caret)
+        library(ggplot2)
+        library(randomForest)
+#loading the training data
+        training = read.csv("pml-training.csv")
+#loading the test data set
+        testing = read.csv("pml-test.csv")
+```
+
+---
+
+## The Data
+
+```{r }
+
+#dimensions of training data
+        dim(training)
+#dimensions of test data
+        dim(testing)
+#closer look at feature set
+        colnames(training)[1:10]
+        colnames(training)[50:60]
+        colnames(training)[100:110]
+        colnames(training)[150:160]
+        
+#The "classe" variable in the training set which is of interest
+        summary(training$classe)
+```
+---
+
+## Exploratory Data Analysis
+
+###Looking at the sheer volume of data, it is clear that we need to narrow down the potential predictors for our study. A closer look at the features, using the pattern matching capabilities of R, helps us shortlist variables which we can then use for exploratory data analysis using relevant plots.
+ 
+###To illustrate, we would assume that measurement features pertaining to forearm/arm will have a higher influence on classification between Class A (the correct way)and Class B(common mistake of putting elbows to the front). Lets do a quick data analysis to check this.
+
+```{r, echo=FALSE}
+#pattern matching for columns containing arm/forearm
+        l<-grep("arm",colnames(training))
+#getting the relevant column names
+        colnames(training[grep("arm",colnames(training))])
+#getting rid of nas        
+        training[is.na(training)] <- 0
+        
+#plot1 classe against pitch_forearm
+        p <- ggplot(data=training, aes(classe,pitch_forearm))
+        p + geom_boxplot(aes(fill =classe))
+#plot2 classe against gyros_arm_x
+        p <- ggplot(data=training, aes(classe,gyros_arm_x))
+        p + geom_boxplot(aes(fill =classe))
+        
+```
+
+---
+
+## Technique
+
+###Looking at the above, it seems that **an approach involving a step by step binary classification between class A vs. each of the other classes ** may yield us a list of variables that we can use to finally train our final model for classifying the data.
+
+###To check the feasibilty of the above approach, we generated a subset of the data to include only the variables of interest(using exploratory data plots, not included in this document, in the interest of brevity). Then we further split up data into training and test(for cross validation). A look at the accuracy on the taining and cross validation set will help us decide in favour of/against this approach. We plan to use random forest to train our classifier since its the most efficient one for non linear settings. 
+
+---
+
+```{r, echo=FALSE}
+#subset the data - include only class A and class B and feature set for 
+#arm/forearm/dumbbell excluding all statistical variables
+        
+        trainings<-training[training$classe %in% c("A","B"),
+                    c("accel_dumbbell_x","accel_dumbbell_y",
+                       "magnet_dumbbell_x","gyros_arm_x","gyros_arm_y",
+                       "pitch_arm","pitch_forearm","magnet_forearm_x",
+                       "magnet_forearm_y","accel_forearm_x","classe")]
+#ignoring all other classes
+        trainings$classe=factor(trainings$classe)
+#creating training and cross validation sets
+        inTrain = createDataPartition(trainings$classe, p = 3/4)[[1]]
+        train = trainings[ inTrain,]
+        test = trainings[ -inTrain,]
+#using random forest to train our classifier
+        modFit1 <- train(classe ~., 
+              method = "rf",
+              data=train,
+              verbose = FALSE,
+              trControl=trainControl(method="cv"),number=3
+              )
+        
+#final model parameters
+        modFit1     
+#getting prediction 
+        pred1<-predict(modFit1,test)
+#getting accuracy
+        test$rightPred <- (pred1 == test$classe) 
+        accuracy <- sum(test$rightPred)/nrow(test)
+        accuracy
+#looking for strong correlations to eliminate if neccessary
+        cor(trainings[sapply(trainings, function(x) !is.factor(x))])
+
+```
+###The accuracy figure of $round(accuracy*100,2) is very encouraging. Hence we go ahead and fit models for each of the other classes. We end up with a variable list that we use to run our final model on, again using random forest.
+
+```{r eval=FALSE}
+print("Don't run me")
+```
