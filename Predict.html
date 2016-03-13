@@ -222,8 +222,8 @@ $(document).ready(function () {
 <hr />
 </div>
 </div>
-<div id="technique" class="section level2">
-<h2>Technique</h2>
+<div id="machine-learning-technique" class="section level2">
+<h2>Machine Learning Technique</h2>
 <div id="looking-at-the-above-it-seems-that-an-approach-involving-a-step-by-step-binary-classification-between-class-a-vs.each-of-the-other-classes-may-yield-us-a-list-of-variables-that-we-can-use-to-finally-train-our-final-model-for-classifying-the-data." class="section level3">
 <h3>Looking at the above, it seems that <strong>an approach involving a step by step binary classification between class A vs. each of the other classes </strong> may yield us a list of variables that we can use to finally train our final model for classifying the data.</h3>
 </div>
@@ -238,17 +238,17 @@ $(document).ready(function () {
 ## 
 ## No pre-processing
 ## Resampling: Cross-Validated (10 fold) 
-## Summary of sample sizes: 6329, 6330, 6329, 6330, 6330, 6331, ... 
+## Summary of sample sizes: 6330, 6330, 6330, 6330, 6330, 6329, ... 
 ## Resampling results across tuning parameters:
 ## 
 ##   mtry  Accuracy   Kappa      Accuracy SD  Kappa SD  
-##    2    0.9744047  0.9466084  0.007853469  0.01651717
-##    6    0.9748317  0.9475530  0.006710049  0.01404656
-##   10    0.9724145  0.9424982  0.006441952  0.01358077
+##    2    0.9741204  0.9459997  0.006669031  0.01395239
+##    6    0.9752584  0.9484071  0.006155037  0.01282856
+##   10    0.9719877  0.9416133  0.007039534  0.01465541
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was mtry = 6.</code></pre>
-<pre><code>## [1] 0.9765358</code></pre>
+<pre><code>## [1] 0.9748294</code></pre>
 <pre><code>##                   accel_dumbbell_x accel_dumbbell_y magnet_dumbbell_x
 ## accel_dumbbell_x       1.000000000      -0.38807857        0.45045612
 ## accel_dumbbell_y      -0.388078570       1.00000000       -0.27973342
@@ -284,7 +284,7 @@ $(document).ready(function () {
 ## accel_forearm_x         0.67137146       0.28591063     1.000000000</code></pre>
 </div>
 <div id="the-accuracy-figure-of-roundaccuracy1002-is-very-encouraging.-hence-we-go-ahead-and-fit-models-for-each-of-the-other-classes.-we-end-up-with-a-variable-list-that-we-use-to-run-our-final-model-on-again-using-random-forest." class="section level3">
-<h3>The accuracy figure of **$round(accuracy*100,2)** is very encouraging. Hence we go ahead and fit models for each of the other classes. We end up with a variable list that we use to run our final model on, again using random forest.</h3>
+<h3>The accuracy figure of **’round(accuracy*100,2)’** is very encouraging. Hence we go ahead and fit models for each of the other classes. We end up with a variable list that we use to run our final model on, again using random forest.</h3>
 <pre class="r"><code>###class C
 #pattern matching for columns containing dumbbell
         l&lt;-grep(&quot;dumbbell&quot;,colnames(training))
@@ -371,6 +371,41 @@ $(document).ready(function () {
                  verbose = FALSE,
                  trControl=trainControl(method=&quot;cv&quot;),number=3
         )</code></pre>
+</div>
+</div>
+<div id="final-model-selection" class="section level2">
+<h2>Final model selection</h2>
+<div id="we-will-now-combine-all-above-models-by-including-all-the-predictors-used-and-train-the-model-once-again-using-random-forest-with-cross-validation-on-our-original-training-dataset-which-has-been-split-into-training-and-testfor-validation." class="section level3">
+<h3>We will now combine all above models by including all the predictors used and train the model ,once again, using random forest with cross validation, on our original training dataset which has been split into training and test(for validation).</h3>
+<pre class="r"><code>#original training set - omit nas
+        training[is.na(training)] &lt;- 0
+        inTrain = createDataPartition(training$classe, p = 3/4)[[1]]
+        train = training[ inTrain,]
+        test = training[ -inTrain,]
+
+#building the model with combined predictors
+        modFit5 &lt;- train(classe ~ accel_belt_x+accel_belt_y+accel_belt_z+
+                 roll_belt+pitch_belt+yaw_belt+
+                 magnet_belt_z+magnet_belt_x+
+                 magnet_belt_y+accel_dumbbell_x+accel_dumbbell_y+
+                 magnet_dumbbell_x+gyros_arm_x+gyros_arm_y+
+                 pitch_arm+pitch_forearm+magnet_forearm_x+
+                 magnet_forearm_y+accel_forearm_x+
+                 roll_dumbbell+yaw_dumbbell,
+                method = &quot;rf&quot;,
+                data=train,
+                verbose = FALSE,
+                trControl=trainControl(method=&quot;cv&quot;),number=3
+                )
+#using the final model to test predictions against our validation set
+        pred1&lt;-predict(modFit5,test)
+        test$rightPred &lt;- (pred1 == test$classe) 
+        accuracy &lt;- sum(test$rightPred)/nrow(test)
+        
+#Accuracy of the classifier
+        accuracy</code></pre>
+<pre><code>## [1] 0.9824633</code></pre>
+<hr />
 </div>
 </div>
 

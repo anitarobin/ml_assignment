@@ -77,11 +77,11 @@ Our aim is to apply suitable machine learning techniques to predict the manner i
 
 ---
 
-## Technique
+## Machine Learning Technique
 
 ###Looking at the above, it seems that **an approach involving a step by step binary classification between class A vs. each of the other classes ** may yield us a list of variables that we can use to finally train our final model for classifying the data.
 
-###To check the feasibilty of the above approach, we generated a subset of the data to include only the variables of interest(using exploratory data plots, not included in this document, in the interest of brevity). Then we further split up data into training and test(for cross validation). A look at the accuracy on the taining and cross validation set will help us decide in favour of/against this approach. We plan to use random forest to train our classifier since its the most efficient one for non linear settings. 
+###To check the feasibilty of the above approach, we generated a subset of the data to include only the variables of interest(using exploratory data plots, not included in this document, in the interest of brevity). Then we further split up data into training and test(for validation). A look at the accuracy on the taining and cross validation set will help us decide in favour of/against this approach. We plan to use random forest(with cross validation) to train our classifier since its the most efficient one for non linear settings. 
 
 ---
 
@@ -120,8 +120,132 @@ Our aim is to apply suitable machine learning techniques to predict the manner i
         cor(trainings[sapply(trainings, function(x) !is.factor(x))])
 
 ```
-###The accuracy figure of $round(accuracy*100,2) is very encouraging. Hence we go ahead and fit models for each of the other classes. We end up with a variable list that we use to run our final model on, again using random forest.
 
-```{r eval=FALSE}
-print("Don't run me")
+###The accuracy figure of **'round(accuracy*100,2)'** is very encouraging. Hence we go ahead and fit models for each of the other classes. We end up with a variable list that we use to run our final model on, again using random forest.
+
+
+```{r, eval=FALSE}
+###class C
+#pattern matching for columns containing dumbbell
+        l<-grep("dumbbell",colnames(training))
+
+#getting the relevant column names
+        colnames(training[grep("dumbbell",colnames(training))])
+
+#exploratory plots
+        p <- ggplot(data=training, aes(classe,yaw_dumbbell))
+        p + geom_boxplot(aes(fill =classe))
+
+#subsetting the data
+        trainings<-training[training$classe %in% c("A","C"),
+                    c("accel_dumbbell_x","accel_dumbbell_y",
+                      "magnet_dumbbell_x","roll_dumbbell",
+                      "yaw_dumbbell","classe")]
+        trainings$classe=factor(trainings$classe)
+        inTrain = createDataPartition(trainings$classe, p = 3/4)[[1]]
+        train = trainings[ inTrain,]
+        test = trainings[ -inTrain,]
+#building the classifier
+        modFit2 <- train(classe ~., 
+                method = "rf",
+                data=train,
+                verbose = FALSE,
+                trControl=trainControl(method="cv"),number=3
+)
+#predictions and accuracy
+        pred1<-predict(modFit2,test)
+        test$rightPred <- (pred1 == test$classe) 
+        accuracy <- sum(test$rightPred)/nrow(test)
+        accuracy 
+
+#Repeat for class D
+        
+#subsetting for training and validation set
+        trainings<-training[training$classe %in% c("A","D"),
+                    c("accel_dumbbell_x","accel_dumbbell_y",
+                      "magnet_dumbbell_x","roll_dumbbell",
+                      "yaw_dumbbell","classe")]
+        trainings$classe=factor(trainings$classe)
+        inTrain = createDataPartition(trainings$classe, p = 3/4)[[1]]
+        train = trainings[ inTrain,]
+        test = trainings[ -inTrain,]
+
+#training the classifier
+        modFit3 <- train(classe ~., 
+                 method = "rf",
+                 data=train,
+                 verbose = FALSE,
+                 trControl=trainControl(method="cv"),number=3
+)
+#testing the accuracy
+        pred1<-predict(modFit3,test)
+        test$rightPred <- (pred1 == test$classe) 
+        accuracy <- sum(test$rightPred)/nrow(test)
+        accuracy 
+
+#Repeat for class E
+        
+ #pattern matching for columns containing belt
+        l<- grep("belt",colnames(training))
+        
+#exploratory plots
+        p <- ggplot(data=training, aes(classe,magnet_belt_z))
+        p + geom_boxplot(aes(fill =classe))
+
+#subsetting the data
+        trainings<-training[training$classe %in% c("A","E"),
+                    c("accel_belt_x","accel_belt_y","accel_belt_z",
+                      "roll_belt","pitch_belt","yaw_belt",
+                      "magnet_belt_z","magnet_belt_x",
+                      "magnet_belt_y","classe")]
+        trainings$classe=factor(trainings$classe)
+        inTrain = createDataPartition(trainings$classe, p = 3/4)[[1]]
+        train = trainings[ inTrain,]
+        test = trainings[ -inTrain,]
+#checking for correlations
+        cor(trainings[sapply(trainings, function(x) !is.factor(x))])
+#building the model
+        modFit4 <- train(classe ~., 
+                 method = "rf",
+                 data=train,
+                 verbose = FALSE,
+                 trControl=trainControl(method="cv"),number=3
+        )
 ```
+
+##Final model selection
+
+###We will now combine all above models by including all the predictors used and train the model ,once again, using random forest with cross validation, on our original training dataset which has been split into training and test(for validation).
+
+```{r }
+
+#original training set - omit nas
+        training[is.na(training)] <- 0
+        inTrain = createDataPartition(training$classe, p = 3/4)[[1]]
+        train = training[ inTrain,]
+        test = training[ -inTrain,]
+
+#building the model with combined predictors
+        modFit5 <- train(classe ~ accel_belt_x+accel_belt_y+accel_belt_z+
+                 roll_belt+pitch_belt+yaw_belt+
+                 magnet_belt_z+magnet_belt_x+
+                 magnet_belt_y+accel_dumbbell_x+accel_dumbbell_y+
+                 magnet_dumbbell_x+gyros_arm_x+gyros_arm_y+
+                 pitch_arm+pitch_forearm+magnet_forearm_x+
+                 magnet_forearm_y+accel_forearm_x+
+                 roll_dumbbell+yaw_dumbbell,
+                method = "rf",
+                data=train,
+                verbose = FALSE,
+                trControl=trainControl(method="cv"),number=3
+                )
+#using the final model to test predictions against our validation set
+        pred1<-predict(modFit5,test)
+        test$rightPred <- (pred1 == test$classe) 
+        accuracy <- sum(test$rightPred)/nrow(test)
+        
+#Accuracy of the classifier
+        accuracy
+```
+---
+
