@@ -25,8 +25,17 @@ Our aim is to apply suitable machine learning techniques to predict the manner i
         library(caret)
         library(ggplot2)
         library(randomForest)
+        library(corrgram)
+
+#getting the training and test data
+train_url<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+test_url<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"      
+
+         download.file(train_url,destfile="pml-training.csv")
+        download.file(test_url,destfile="pml-test.csv")
+        
 #loading the training data
-        training = read.csv("pml-training.csv")
+         training = read.csv("pml-training.csv")
 #loading the test data set
         testing = read.csv("pml-test.csv")
 ```
@@ -49,6 +58,20 @@ Our aim is to apply suitable machine learning techniques to predict the manner i
         
 #The "classe" variable in the training set which is of interest
         summary(training$classe)
+        
+
+#Plotting a few correlation plot to get a sense of variable dependency
+        
+        corrgram(training[1:10],order = TRUE,
+                 lower.panel = panel.shade,
+                 upper.panel = panel.pie,
+                 text.panel = panel.txt,
+                 main="Correlation plot1")
+        corrgram(training[80:90],order = TRUE,
+                 lower.panel = panel.shade,
+                 upper.panel = panel.pie,
+                 text.panel = panel.txt,
+                 main="Correlation plot2")
 ```
 ---
 
@@ -262,4 +285,4 @@ Our aim is to apply suitable machine learning techniques to predict the manner i
 
 ##Conclusion
 
-###Using random forest iteratively using binary classification between class A and each of the other classes in each step leads us to a very good classifier with an accuracy of ~98%. We expect an out of sample error rate of less than 2%.
+###Using random forest iteratively using binary classification between class A and each of the other classes in each step leads us to a very good classifier with an accuracy of ~98%. The expected  out of sample error rate is around 2%, based on our final model.
